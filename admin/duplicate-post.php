@@ -1167,12 +1167,17 @@ class DuplicatePost{
 			$new_post["post_title"] = $to_post->post_title;
 			$new_post["post_status"] = $to_post->post_status;
 			$new_post["ID"] = $to_post_id;
+			$new_post["post_author"] = $to_post->post_author;
 		}
 
-		if($this->get_option('duplicate_post_copydate') == 1){
-			$new_post['post_date'] = $new_post_date =  $post_to_dup->post_date ;
-			$new_post['post_date_gmt'] = get_gmt_from_date($new_post_date);
-		}
+		if($this->get_option('duplicate_post_copydate') == 1 && empty( $to_post_id ) ){
+                       $new_post['post_date'] = $new_post_date =  $post_to_dup->post_date ;
+                       $new_post['post_date_gmt'] = get_gmt_from_date($new_post_date);
+               } else if( ! empty( $to_post_id ) ) {
+                       // We are merging back, do not override publish date
+                       $new_post['post_date'] = $new_post_date =  $to_post->post_date ;
+                       $new_post['post_date_gmt'] = get_gmt_from_date($new_post_date);
+               }
 
 		$new_post_id = wp_insert_post($new_post);
 		delete_post_meta($new_post_id, '_dp_original_backup');
